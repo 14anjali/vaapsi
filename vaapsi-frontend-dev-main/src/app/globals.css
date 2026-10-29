@@ -1,0 +1,127 @@
+@import '../styles/tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Global base styles. No colour literals and no font-family declarations here —
+ * both belong in styles/tokens.css and reach this file through Tailwind
+ * utilities that resolve to custom properties.
+ */
+
+@layer base {
+  * {
+    @apply border-line;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background font-body text-base leading-normal text-ink;
+    font-weight: var(--weight-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Headings inherit the display face and its weight. Sizes are applied per
+   * use, not globally — a h2 in a passport panel and a h2 on the home hero are
+   * not the same size and pretending otherwise makes every page fight the reset. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display;
+    font-weight: var(--weight-display);
+    letter-spacing: var(--tracking-2xl);
+    line-height: var(--leading-tight);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* One focus treatment for the whole site, in the accent. Never removed —
+   * WCAG 2.1 AA on focus states is the floor this project proposed. */
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-accent;
+  }
+
+  ::selection {
+    @apply bg-accent text-accent-ink;
+  }
+
+  /* Respect the setting. Framer Motion reads this too, via useReducedMotion. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/*
+ * Print.
+ *
+ * The passport route is a physical destination — a QR sewn into a garment
+ * resolves there, and someone will print it. These rules strip the storefront
+ * chrome so a printed passport is a clean document rather than a screenshot of a
+ * website: no nav, no footer, no links to things that are not on the paper.
+ *
+ * Kept here rather than in tokens.css because it is layout, not a token.
+ */
+@media print {
+  /* The shell has nothing to say on paper. */
+  header,
+  footer,
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  main {
+    /* Undo the flex column, so print pagination is normal block flow. */
+    display: block;
+  }
+
+  /* Backgrounds do not print. Anything relying on a surface fill for structure
+   * needs a rule instead, or it disappears. */
+  .bg-surface,
+  .bg-surface-raised {
+    background: transparent !important;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* Never split a record entry across a page break. */
+  li,
+  dl,
+  figure,
+  details {
+    break-inside: avoid;
+  }
+
+  /* Disclosures print open. A collapsed section on paper is lost content. */
+  details > summary {
+    display: none;
+  }
+  details > *:not(summary) {
+    display: block !important;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+}

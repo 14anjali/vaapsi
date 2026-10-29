@@ -1,0 +1,13 @@
+# Ignore all node_modules folders
+**/node_modules/
+node_modules/
+
+# Ignore all environment files
+**/.env
+**/.env.*
+.env
+.env.*
+
+# Allow .env.example files
+!.env.example
+!**/.env.example

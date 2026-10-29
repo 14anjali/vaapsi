@@ -1,0 +1,10 @@
+# Normalise to LF in the repo. The team is mixed Windows/macOS/Linux and
+# CRLF churn in diffs makes review noise that hides real changes.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff2 binary
+pnpm-lock.yaml -diff linguist-generated

@@ -1,0 +1,403 @@
+/*
+ * ============================================================================
+ * Vaapsi design tokens
+ * ============================================================================
+ *
+ * This is the ONLY file in the repository allowed to contain a colour literal
+ * or a font-family declaration. Everything visual in every component resolves
+ * to a custom property defined here. That is what makes re-theming a config
+ * change rather than a rewrite, and it is what makes the Phase 8 studio panel
+ * possible at all.
+ *
+ * Colour is expressed as bare HSL triplets ("0 0% 100%") in the shadcn
+ * convention, so shadcn primitives inherit the theme for free and Tailwind can
+ * wrap them as hsl(var(--token) / <alpha>).
+ *
+ * Token names are SEMANTIC, never literal. There is no --grey-400. There is
+ * --line, because that is the job it does, and a preset is free to make it any
+ * colour it likes.
+ *
+ * Adding a third colour preset is a [data-theme="name"] block of about twelve
+ * lines. Adding a font pairing is a [data-font="name"] block of two to five.
+ */
+
+/* ==========================================================================
+ * 1. COLOUR
+ * ========================================================================== */
+
+:root,
+[data-theme='mono'] {
+  /* ---- Vaapsi slots ------------------------------------------------------ */
+
+  /* The page itself. */
+  --background: 0 0% 100%;
+  /* A panel sitting on the page — filter drawers, cards that need separating. */
+  --surface: 0 0% 98%;
+  /* A panel above that — dialogs, popovers, the sticky add-to-bag bar. */
+  --surface-raised: 0 0% 100%;
+
+  /* Primary text. Near-black rather than black: pure black on pure white is
+   * harsher than it needs to be at body sizes. */
+  --ink: 0 0% 8%;
+  /* Secondary text — supporting copy, metadata, measurements. */
+  --ink-muted: 0 0% 40%;
+  /* Tertiary text — timestamps, captions, disabled states. AA at 14px+. */
+  --ink-subtle: 0 0% 55%;
+
+  /* Hairline rules and input borders. */
+  --line: 0 0% 90%;
+  /* A border that has to be *seen* — outlined buttons, inputs, active tabs.
+   * Darker than it looks like it should be, deliberately: WCAG 1.4.11 wants 3:1
+   * against the ground for any boundary that identifies a control, and the
+   * hairline value this started at measured 1.7:1. If a control's edge is the
+   * only thing telling you it is a control, that edge is not decoration.
+   * `--line` stays light — that one really is decoration. */
+  --line-strong: 0 0% 56%;
+
+  /* #900000. The dot over the "i". The entire colour story.
+   * This is the verification mark, the active state and the loading indicator.
+   * If you are reaching for --accent to decorate something, stop. */
+  --accent: 0 100% 28%;
+  --accent-ink: 0 0% 100%;
+
+  /* Money the shopper keeps. The second and last colour in the system, and it
+   * exists because the alternative was worse: a delivery discount rendered in
+   * --accent read as an error or a penalty, when it is the one number on the
+   * checkout page that is unambiguously good news. Red for "− ₹1,845" is
+   * actively misleading.
+   *
+   * It is NOT a success/positive-feedback colour and there is no --positive-ink
+   * to sit text on, because nothing is ever filled with it. Its only job is a
+   * numeral and the word next to it. Everything else — confirmations, valid
+   * states, applied badges — stays monochrome.
+   *
+   * Deep enough to clear 4.5:1 on both --background and --surface, because it
+   * is always small text. */
+  --positive: 152 62% 28%;
+
+  /* ---- shadcn required set ---------------------------------------------- *
+   * Mapped onto the slots above, never given values of their own. A shadcn
+   * primitive dropped in unmodified then already looks like Vaapsi.           */
+  --foreground: var(--ink);
+  --card: var(--surface-raised);
+  --card-foreground: var(--ink);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: 0 0% 100%;
+  --secondary: var(--surface);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface);
+  --muted-foreground: var(--ink-muted);
+  --accent-foreground: var(--accent-ink);
+  --destructive: var(--accent);
+  --destructive-foreground: var(--accent-ink);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--ink);
+}
+
+/* Near-black ground. Not "dark mode" in the OS sense — a deliberate inverse
+ * treatment, which is why it is a named preset and not a media query. */
+[data-theme='inverse'] {
+  --background: 0 0% 7%;
+  --surface: 0 0% 11%;
+  --surface-raised: 0 0% 14%;
+
+  --ink: 0 0% 96%;
+  --ink-muted: 0 0% 66%;
+  --ink-subtle: 0 0% 48%;
+
+  --line: 0 0% 20%;
+  /* Lifted for the same 3:1 reason, against the near-black ground. */
+  --line-strong: 0 0% 40%;
+
+  /* Same hue, lifted lightness. #900000 on a near-black ground fails contrast
+   * and reads as brown; the dot has to stay recognisably the dot. */
+  --accent: 0 100% 42%;
+  --accent-ink: 0 0% 100%;
+
+  /* Lifted for the same reason. A 28%-lightness green on a near-black ground is
+   * a dark smudge, not a saving. */
+  --positive: 150 55% 55%;
+
+  --primary-foreground: 0 0% 7%;
+  --primary: var(--ink);
+  --ring: var(--ink);
+}
+
+/* ==========================================================================
+ * 2. TYPE
+ * ==========================================================================
+ *
+ * Seven families are loaded at build time by next/font/google in the root
+ * layout, each into its own variable (--font-jost, --font-bodoni, …). The two
+ * SEMANTIC slots below then point at one of them.
+ *
+ * Switching a font preset reassigns --font-display and --font-body. It never
+ * loads a font on demand — every family is already in the document. That keeps
+ * next/font's build-time subsetting and self-hosting, and means no flash and no
+ * layout shift when the preset changes.
+ */
+
+:root {
+  --font-display: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+
+  /* Weight tokens are semantic so a preset can shift them. Bodoni at 400 and
+   * Jost at 400 do not carry the same visual weight, and a preset that cannot
+   * compensate for that is a preset that looks broken in one of its states. */
+  --weight-body: 400;
+  --weight-emphasis: 500;
+  --weight-display: 400;
+
+  /* ---- scale ------------------------------------------------------------ *
+   * Modular, ratio ~1.25 through the text sizes, opening up at display sizes
+   * where the jumps need to be felt rather than measured.                    */
+  --text-xs: 0.75rem; /* 12 */
+  --text-sm: 0.8125rem; /* 13 */
+  --text-base: 0.9375rem; /* 15 — body copy */
+  --text-lg: 1.0625rem; /* 17 */
+  --text-xl: 1.3125rem; /* 21 */
+  --text-2xl: 1.625rem; /* 26 */
+  --text-3xl: 2.125rem; /* 34 */
+  --text-4xl: 2.75rem; /* 44 */
+  --text-5xl: 3.75rem; /* 60 */
+  --text-6xl: 5.25rem; /* 84 */
+
+  /* ---- tracking --------------------------------------------------------- *
+   * Tightens as size increases. Display type set at body tracking looks loose
+   * and amateur; body type set at display tracking is unreadable.            */
+  --tracking-xs: 0.03em;
+  --tracking-sm: 0.015em;
+  --tracking-base: 0em;
+  --tracking-lg: 0em;
+  --tracking-xl: -0.005em;
+  --tracking-2xl: -0.01em;
+  --tracking-3xl: -0.015em;
+  --tracking-4xl: -0.02em;
+  --tracking-5xl: -0.028em;
+  --tracking-6xl: -0.036em;
+
+  /* Uppercase eyebrows and nav labels need the opposite treatment. */
+  --tracking-caps: 0.09em;
+
+  /* ---- leading ---------------------------------------------------------- */
+  --leading-none: 1;
+  --leading-tight: 1.08;
+  --leading-snug: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+}
+
+/* ---- font pairing presets ------------------------------------------------ */
+
+[data-font='modernist'] {
+  --font-display: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+}
+
+[data-font='didone'] {
+  --font-display: var(--font-bodoni), ui-serif, Georgia, serif;
+  --font-body: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  /* Bodoni's hairlines disappear at 400 in large sizes on a light ground. */
+  --weight-display: 500;
+}
+
+[data-font='grotesk'] {
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Archivo runs wide and heavy; display drops back to keep the page quiet. */
+  --weight-display: 400;
+  --weight-emphasis: 500;
+}
+
+[data-font='editorial'] {
+  --font-display: var(--font-instrument), ui-serif, Georgia, serif;
+  --font-body: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Instrument Serif ships a single weight. */
+  --weight-display: 400;
+}
+
+[data-font='heritage'] {
+  --font-display: var(--font-garamond), ui-serif, Georgia, serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Garamond reads light at text sizes; body steps up a notch. */
+  --weight-body: 400;
+  --weight-display: 500;
+}
+
+/* ==========================================================================
+ * 3. SPACE
+ * ==========================================================================
+ * 4px base. Named by step, not by intent, because a gap of 16px is a gap of
+ * 16px whether it is inside a card or between two sections.
+ */
+
+:root {
+  --space-0: 0;
+  --space-1: 0.25rem; /* 4 */
+  --space-2: 0.5rem; /* 8 */
+  --space-3: 0.75rem; /* 12 */
+  --space-4: 1rem; /* 16 */
+  --space-5: 1.25rem; /* 20 */
+  --space-6: 1.5rem; /* 24 */
+  --space-8: 2rem; /* 32 */
+  --space-10: 2.5rem; /* 40 */
+  --space-12: 3rem; /* 48 */
+  --space-16: 4rem; /* 64 */
+  --space-20: 5rem; /* 80 */
+  --space-24: 6rem; /* 96 */
+  --space-32: 8rem; /* 128 */
+  --space-40: 10rem; /* 160 */
+  --space-48: 12rem; /* 192 */
+}
+
+/* ==========================================================================
+ * 4. RADIUS
+ * ==========================================================================
+ * Near-square by default. This direction wants sharp corners — but it is a
+ * token rather than an assumption baked into fifty components, so the decision
+ * can be tested against the client instead of argued about.
+ */
+
+:root {
+  --radius-none: 0px;
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+  --radius-full: 9999px;
+
+  /* shadcn reads --radius. Pointing it at the small step keeps generated
+   * primitives in the same register as everything else. */
+  --radius: var(--radius-sm);
+}
+
+/* ==========================================================================
+ * 5. MOTION
+ * ==========================================================================
+ * One curve, used everywhere, so the whole site moves with one personality.
+ * If a transition needs a different curve, the transition is probably wrong.
+ */
+
+:root {
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* For things leaving — exits accelerate, entrances decelerate. */
+  --ease-exit: cubic-bezier(0.55, 0, 0.55, 0.2);
+
+  --duration-instant: 80ms;
+  --duration-fast: 160ms;
+  --duration-base: 260ms;
+  --duration-slow: 420ms;
+  --duration-slower: 640ms;
+}
+
+/* ==========================================================================
+ * 6. ELEVATION
+ * ==========================================================================
+ * There is no decorative shadow in this direction. Depth is expressed with a
+ * hairline and a surface change. The tokens exist so the two places that
+ * genuinely need lift — a dropdown over a photograph, a mobile sheet — are
+ * consistent with each other rather than invented on the spot.
+ */
+
+:root {
+  --elevation-none: none;
+  --elevation-overlay: 0 1px 2px hsl(0 0% 0% / 0.04), 0 8px 24px hsl(0 0% 0% / 0.06);
+  --elevation-sheet: 0 -1px 0 hsl(var(--line)), 0 -12px 32px hsl(0 0% 0% / 0.08);
+}
+
+[data-theme='inverse'] {
+  --elevation-overlay: 0 1px 2px hsl(0 0% 0% / 0.4), 0 8px 24px hsl(0 0% 0% / 0.5);
+  --elevation-sheet: 0 -1px 0 hsl(var(--line)), 0 -12px 32px hsl(0 0% 0% / 0.6);
+}
+
+/* ==========================================================================
+ * 7. LAYOUT
+ * ========================================================================== */
+
+:root {
+  /* Editorial measure. Body copy past this is hard to track back from. */
+  --measure: 68ch;
+  --measure-narrow: 46ch;
+  --container-max: 90rem;
+  --gutter: var(--space-5);
+}
+
+/* ---- vertical rhythm ---------------------------------------------------- *
+ * One token for the space between page sections, and one for the tighter
+ * spacing inside them.
+ *
+ * These exist because section padding was hardcoded in eight components with
+ * three slightly different values, which is both a scroll problem and a
+ * consistency problem. Tuning the whole site's density is now two numbers.
+ *
+ * Deliberately tighter than the generous editorial default this started at.
+ * The register is still Zara/COS, but that reference works at a scale where a
+ * section fills the viewport with product — copying its padding onto sections
+ * that hold four cards produces dead space, not restraint.
+ */
+:root {
+  --space-section: var(--space-10);
+  --space-section-tight: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter: var(--space-8);
+    --space-section: var(--space-12);
+    --space-section-tight: var(--space-8);
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --gutter: var(--space-12);
+    --space-section: var(--space-16);
+    --space-section-tight: var(--space-10);
+  }
+}
+
+/* ==========================================================================
+ * 8. PRINT
+ * ==========================================================================
+ * Print is a third colour preset, and it belongs here rather than in a print
+ * stylesheet full of literals.
+ *
+ * Paper is white and ink is black, whichever preset the shopper was viewing.
+ * Printing the inverse theme would empty a cartridge and produce something
+ * unreadable. Because every component resolves its colour through these slots,
+ * redefining them here converts the whole site to a print-safe palette in
+ * fourteen lines — the same trick as the theme switcher, pointed at paper.
+ */
+@media print {
+  :root,
+  [data-theme='mono'],
+  [data-theme='inverse'] {
+    --background: 0 0% 100%;
+    --surface: 0 0% 100%;
+    --surface-raised: 0 0% 100%;
+
+    --ink: 0 0% 0%;
+    --ink-muted: 0 0% 25%;
+    --ink-subtle: 0 0% 40%;
+
+    --line: 0 0% 70%;
+    --line-strong: 0 0% 45%;
+
+    /* The dot stays. It is the verification mark, and a printed passport that
+     * loses it loses the thing it is evidence of. */
+    --accent: 0 100% 28%;
+    --accent-ink: 0 0% 100%;
+
+    /* Unchanged: the print ground is white, which is what the mono value was
+     * chosen against. A printed order summary that loses the green loses the
+     * distinction between a charge and a saving. */
+    --positive: 152 62% 28%;
+
+    --elevation-overlay: none;
+    --elevation-sheet: none;
+  }
+}
